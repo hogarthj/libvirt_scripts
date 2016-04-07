@@ -10,4 +10,15 @@ a flat inventory file, the groups are taken from the desc field of the VM
 
 See [Ansible and libvirt, a marriage made in python](https://www.hogarthuk.com/?q=node/12) for more details.
 
+## Quick test VM creation and destrcution
+
+Following on from the above you still need to lookup the address to ssh right? Wrong!
+
+The bin directory contains scripts to ssh, clone and completely remove any VM by name alone.
+
+Note the clone uses --reflink which requires btrfs, remove reflink for a slower clone if 
+using an altenrative filesystem.
+
+The clone assumes a syntax of c5-, c6-, c7-, f22, f23, f24 or fraw- as a prefix to designate
+the which type of system to clone and assumes a suitable -template image has been prepared.
 

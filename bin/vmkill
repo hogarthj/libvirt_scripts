@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+if [[ "$#" -eq "0" ]]
+then
+    echo "Requires a VM name"
+    echo "VMs found are:"
+    virsh list --all --name
+    exit 1
+fi
+
+vmname=$1
+
+if ! virsh domstate $vmname  &> /dev/null
+then
+    echo "VM ${vmname} not found"
+    echo "VMs found are:"
+    virsh list --all --name
+    exit 1
+fi
+
+if virsh domstate $vmname | grep running &> /dev/null
+then
+    virsh destroy $vmname
+fi
+
+virsh pool-refresh default  &> /dev/null
+
+virsh undefine $vmname --managed-save  --snapshots-metadata --storage $(virsh domblklist $vmname --details | awk '$1 ~ /file/ && $2 ~ /disk/ {ORS=","; print $3}' | sed 's/,$/\n/')

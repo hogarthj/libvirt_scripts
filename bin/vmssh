@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+mgmt_net="192.168.124"
+
+if [[ "$#" -eq "0" ]]
+then
+    echo "Requires a VM name"
+    echo "VMs running are:"
+    virsh list --name
+    exit 1
+fi
+
+vmname=$1
+
+if ! virsh domifaddr $vmname  &> /dev/null
+then
+    echo "VM ${vmname} not found"
+    echo "VMs running are:"
+    virsh list --name
+    exit 1
+fi
+
+vmnet="$(virsh domifaddr $vmname --source agent --full | \
+    awk -v mgmt=${mgmt_net} '($1 !~ /lo/ && $3 ~ /ipv4/ && $4 ~ mgmt) {print $4}')"
+
+ssh ${vmnet%%/*}

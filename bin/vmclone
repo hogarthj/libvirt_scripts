@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+if [[ "$#" -eq "0"  ]]
+then
+    echo "Requires a VM name to create"
+    exit 1
+fi
+
+declare -a templates
+
+vmname="$1"
+vmsource=""
+
+templates=(  $(virsh list --inactive --name | grep -- '-template') )
+
+for i in $(seq 0 $(( ${#templates[*]} - 1  )) )
+do
+    if [[ "${vmname%%-*}-template" == "${templates[$i]}" ]]
+    then
+        vmsource="${templates[$i]}"
+        break
+    fi
+done
+
+# Check a template has been found and that it meets naming standards
+# VM should look like c7-foo-bar and reject foo-bar, c7 or c7- as names
+
+if [[ "$vmsource" == "" ]] || [[ "${vmname#*-}" == "" ]] || [[ ! "${vmname}" =~ - ]]
+then
+    echo "No template found to build ${vmname} from"
+    echo "Name of vm should start with base image code"
+    echo ${templates[*]} | sed 's/-template/-/g'
+    exit 1
+fi
+
+echo "Creating VM ${vmname} from base ${vmsource}"
+
+virt-clone -o ${vmsource} --auto-clone --reflink -n ${vmname}
+
