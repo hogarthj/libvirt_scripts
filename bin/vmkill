@@ -21,6 +21,12 @@ then
     exit 1
 fi
 
+if [[ "${vmname}" =~ ^.*-template$ ]] 
+then
+    echo "This is a template image, refusing to remove"
+    exit 1
+fi
+
 if virsh domstate $vmname | grep running &> /dev/null
 then
     virsh destroy $vmname
