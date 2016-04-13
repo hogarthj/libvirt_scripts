@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+if [[ "$#" -eq "0"   ]]
+then
+    echo "Requires a VM name to create"
+        exit 1
+fi
+
+mgmtgw="192.168.124.1"
+vmks=""
+vmurl=""
+vmname="$1"
+
+vmbase="${vmname%%-*}"
+
+vmid="${vmname#*-}"
+
+if [[ "${vmid}" == ${vmbase} ]] || [[ "${vmid}" == "" ]]
+then
+    echo "Need a name after the base type"
+    exit 1
+fi
+
+case  $vmbase in
+    c6) vmks="http://${mgmtgw}/ks/el6-ks.cfg"
+        vmurl="http://mirror.centos.org/centos-6/6/os/x86_64/"
+        ;;
+    c7) vmks="http://${mgmtgw}/ks/el7-ks.cfg"
+        vmurl="http://mirror.centos.org/centos-7/7/os/x86_64/"
+        ;;
+    f22) vmks="http://${mgmtgw}/ks/f22-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/22/Server/x86_64/os/"
+        ;;
+    f23) vmks="http://${mgmtgw}/ks/f23-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/23/Server/x86_64/os/"
+        ;;
+    f24) vmks="http://${mgmtgw}/ks/f24-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/test/24_Alpha/Server/x86_64/os/"
+        ;;
+    fraw)vmks="http://${mgmtgw}/ks/fraw-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
+        ;;
+    *)  echo "base not recognised, must be c6, c7, f22-24 or fraw"
+        exit 1
+        ;;
+esac
+
+virt-install -n ${vmname} \
+            --memory memory=1536,maxmemory=4096 \
+            --vcpus vcpus=1,maxvcpus=3 \
+            --cpu host \
+            --clock offset=utc,kvmclock_present=yes \
+            --features acpi=on,apic=on \
+            --location "${vmurl}" \
+            --extra-args "ks=${vmks}" \
+            --disk pool=default,size=20,bus=scsi,sparse=yes,format=raw \
+            --network network=default,model=virtio \
+            --graphics spice \
+            --sound none \
+            --controller scsi,model=virtio-scsi \
+            --channel spicevmc,target_type=virtio \
+            --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 \
+            --video qxl \
+            --memballoon virtio \
+            --rng /dev/random \
+            --noautoconsole 
+
+nohup virt-viewer -r -w ${vmname} &> /dev/null &
+
+
+
