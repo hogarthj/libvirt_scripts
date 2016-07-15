@@ -21,9 +21,11 @@ then
     exit 1
 fi
 
-if [[ "${vmname}" =~ ^.*-template$ ]] 
+: "${VMFORCE:=protect}"
+
+if [[ "${vmname}" =~ ^.*-template$ ]] && [[ "$VMFORCE" != "bye" ]] 
 then
-    echo "This is a template image, refusing to remove"
+    echo "This is a template image, refusing to remove, set env VMFORCE to bye"
     exit 1
 fi
 
