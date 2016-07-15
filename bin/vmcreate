@@ -38,7 +38,7 @@ case  $vmbase in
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/23/Server/x86_64/os/"
         ;;
     f24) vmks="http://${mgmtgw}/ks/f24-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/test/24_Alpha/Server/x86_64/os/"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/24/Server/x86_64/os/"
         ;;
     fraw)vmks="http://${mgmtgw}/ks/fraw-ks.cfg"
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
