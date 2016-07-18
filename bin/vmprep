@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+if [[ "$#" -eq "0"  ]]
+then
+    echo "Requires a VM template to prep"
+    exit 1
+fi
+
+if [[ $UID -ne 0 ]]
+then
+    echo "Must run as root"
+    exit 1
+fi
+
+declare -a templates
+
+vmname="$1"
+vmsource=""
+
+templates=(  $(virsh list --inactive --name | grep -- '-template') )
+
+for i in $(seq 0 $(( ${#templates[*]} - 1  )) )
+do
+    if [[ "${vmname}" == "${templates[$i]}" ]]
+    then
+        vmsource="${templates[$i]}"
+        break
+    fi
+done
+
+if [[ "${vmsource}" == ""  ]]
+then
+    echo "No template of ${vmname} found to prep"
+    exit 1
+fi
+
+pushd /var/lib/libvirt/images
+
+if [[ -f ${vmsource}.raw ]]
+then
+    virt-sysprep -d "${vmsource}" \
+        --edit '/etc/selinux/config:s/SELINUX=.*/SELINUX=permissive/' \
+        --ssh-inject root:file:/home/james/.ssh/id_rsa.pub \
+        --firstboot-command 'restorecon -Rv /root/.ssh' \
+        --firstboot-command "sed -i -e 's/SELINUX=permissive/SELINUX=enforcing/' /etc/selinux/config" \
+        --firstboot-command  "setenforce Enforcing"
+    virt-sparsify  --tmp ./overlays/ ${vmsource}.raw{,.sparse}
+    mv -f ${vmsource}.raw{.sparse,}
+    btrfs fi def -v -f ${vmsource}.raw
+fi
+
+popd
+
+echo "${vmsource} ready as template"
