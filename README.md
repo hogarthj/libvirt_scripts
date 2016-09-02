@@ -2,6 +2,8 @@
 
 A varied collection of scripts used for quick VM testing
 
+The ssh_use and mgmt_net variables in the vmprep/create/ssh scripts need to be defined for use
+
 ## Ansible libvirt inventory
 
 ansible/libvirt_inv.py is a dynamic ansible inventory script to probe for local VMs
