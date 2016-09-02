@@ -45,7 +45,7 @@ virsh desc --config $vmname "$groups" &> /dev/null
 
 if [[ "$(virsh dominfo ${vmname})" =~ State.*running ]]
 then
-   virsh desc --live $vmname "$groups" %> /dev/null
+   virsh desc --live $vmname "$groups" &> /dev/null
 fi
 
 echo "new grouping: ${groups}" >&2 
