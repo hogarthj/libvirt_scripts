@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+shopt -s nullglob dotglob
+
+if [[ "$#" -eq "0" ]]
+then
+    echo "Requires a VM name"
+    echo "VMs found are:"
+    virsh list --all --name
+    exit 1
+fi
+
+vmname=$1
+
+if ! virsh domstate $vmname  &> /dev/null
+then
+    echo "VM ${vmname} not found"
+    echo "VMs found are:"
+    virsh list --all --name
+    exit 1
+fi
+
+#'{"groups": ["group1", "group2"]}'
+
+declare -a group=()
+
+if [[ "$#" > 1 ]]
+then
+  for i in $(seq 2 $#)
+  do
+    shift
+    group[${#group[@]}]="\"$1\""
+  done
+fi
+
+if [[ "${#group[@]}" > 0 ]]
+then
+  groups="'{\"groups\": [ $(IFS=,; echo "${group[*]}") ]}'"
+else
+  groups=''
+fi
+
+virsh desc --config $vmname "$groups" &> /dev/null
+
+if [[ "$(virsh dominfo ${vmname})" =~ State.*running ]]
+then
+   virsh desc --live $vmname "$groups" %> /dev/null
+fi
+
+echo "new grouping: ${groups}" >&2 
