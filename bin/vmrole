@@ -36,7 +36,7 @@ fi
 
 if [[ "${#group[@]}" > 0 ]]
 then
-  groups="'{\"groups\": [ $(IFS=,; echo "${group[*]}") ]}'"
+  groups="{\"groups\": [ $(IFS=,; echo "${group[*]}") ]}"
 else
   groups=''
 fi
