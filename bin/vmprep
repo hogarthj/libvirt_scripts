@@ -19,6 +19,8 @@ declare -a templates
 
 vmname="$1"
 vmsource=""
+diskimg=""
+ssh_user="TOBESET"
 
 templates=(  $(virsh list --inactive --name | grep -- '-template') )
 
@@ -41,15 +43,25 @@ pushd /var/lib/libvirt/images
 
 if [[ -f ${vmsource}.raw ]]
 then
+  diskimg="${vmsource}.raw"
+fi
+
+if [[ -f ${vmsource}.img ]]
+then
+  diskimg="${vmsource}.img"
+fi
+
+if [[ -f ${diskimg} ]]
+then
     virt-sysprep -d "${vmsource}" \
         --edit '/etc/selinux/config:s/SELINUX=.*/SELINUX=permissive/' \
-        --ssh-inject root:file:/home/james/.ssh/id_rsa.pub \
+        --ssh-inject root:file:/home/${ssh_user}/.ssh/id_rsa.pub \
         --firstboot-command 'restorecon -Rv /root/.ssh' \
         --firstboot-command "sed -i -e 's/SELINUX=permissive/SELINUX=enforcing/' /etc/selinux/config" \
         --firstboot-command  "setenforce Enforcing"
-    virt-sparsify  --tmp ./overlays/ ${vmsource}.raw{,.sparse}
-    mv -f ${vmsource}.raw{.sparse,}
-    btrfs fi def -v -f ${vmsource}.raw
+    virt-sparsify  --tmp ./overlays/ ${diskimg}{,.sparse}
+    mv -f ${diskimg}{.sparse,}
+    btrfs fi def -v -f ${diskimg}
 fi
 
 popd
