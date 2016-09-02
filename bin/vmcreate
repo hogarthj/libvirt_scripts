@@ -9,7 +9,7 @@ then
         exit 1
 fi
 
-mgmtgw="192.168.124.1"
+mgmtgw="TOBESET"
 vmks=""
 vmurl=""
 vmname="$1"

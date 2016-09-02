@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 shopt -s nullglob dotglob
 
-mgmt_net="192.168.124"
+mgmt_net="TOBESET"
 
 if [[ "$#" -eq "0" ]]
 then
