@@ -9,7 +9,7 @@ then
         exit 1
 fi
 
-mgmt_gw="TOBESET"
+mgmt_net="TOBESET"
 vmks=""
 vmurl=""
 vmname="$1"
