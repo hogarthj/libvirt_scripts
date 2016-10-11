@@ -12,11 +12,12 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
         import sys
         import libvirt
         import json
+
         self.inventory = {'_meta': {'hostvars': {}}}
         self.mgmt_net = "192.168.124.0/24"
         self.read_cli_args()
         self.conn = libvirt.open()
-        if self.conn == None:
+        if self.conn is None:
             print 'Failed to connect to hypervisor'
             sys.exit(1)
 
@@ -58,13 +59,25 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
     def is_mgmt_net(addr, mgmt_net): #pylint: disable=missing-docstring
         import ipaddress
 
-        if addr['type'] == 0 and \
-          ipaddress.ip_address(unicode(addr['addr'])) in ipaddress.ip_network(mgmt_net):
-            return True
-        else:
-            return False
+        return bool(addr['type'] == 0 and \
+          ipaddress.ip_address(unicode(addr['addr'])) in ipaddress.ip_network(mgmt_net)
+                   )
 
-
+    @staticmethod
+    def get_addrs(domain): #pylint: disable=missing-docstring
+        import libvirt
+        try:
+            return domain.interfaceAddresses(
+                libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT)
+        except (TypeError, libvirt.libvirtError) as error:
+            if 'this feature or command is not currently supported' in error.get_error_message():
+                try:
+                    return domain.interfaceAddresses(
+                        libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
+                except (TypeError, libvirt.libvirtError):
+                    pass
+            else:
+                pass
 
     def dom_info(self, domain): #pylint:disable=missing-docstring
         import libvirt
@@ -73,7 +86,7 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
 
         try:
             dom_host_vars = {}
-            dom_ifaces = domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT)
+            dom_ifaces = self.get_addrs(domain)
             if dom_ifaces != None:
                 for iface in dom_ifaces:
                     for addr in dom_ifaces[iface]['addrs']:
