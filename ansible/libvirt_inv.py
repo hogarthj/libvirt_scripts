@@ -69,14 +69,11 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
         try:
             return domain.interfaceAddresses(
                 libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT)
-        except (TypeError, libvirt.libvirtError) as error:
-            if 'this feature or command is not currently supported' in error.get_error_message():
-                try:
-                    return domain.interfaceAddresses(
-                        libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
-                except (TypeError, libvirt.libvirtError):
-                    pass
-            else:
+        except (TypeError, libvirt.libvirtError):
+            try:
+                return domain.interfaceAddresses(
+                    libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE)
+            except (TypeError, libvirt.libvirtError):
                 pass
 
     def dom_info(self, domain): #pylint:disable=missing-docstring
@@ -94,13 +91,15 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
                             dom_host_vars['ansible_host'] = addr['addr']
             if 'ansible_host' not in dom_host_vars:
                 return
+            dom_host_vars['ansible_user'] = 'root'
             if 'groups' in dom_inv:
                 for group in dom_inv['groups']:
+                    if group == 'windows':
+                        dom_host_vars['ansible_user'] = 'Administrator'
                     if group in self.inventory:
                         self.inventory[group]['hosts'].append(domain.name())
                     else:
                         self.inventory.update({group: {'hosts': [domain.name()]}})
-            dom_host_vars['ansible_user'] = 'root'
             if 'hostvars' in dom_inv:
                 dom_host_vars.update(dom_inv['hostvars'])
             self.inventory['_meta']['hostvars'].update({domain.name(): dom_host_vars})
