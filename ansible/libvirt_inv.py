@@ -96,6 +96,10 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
                 for group in dom_inv['groups']:
                     if group == 'windows':
                         dom_host_vars['ansible_user'] = 'Administrator'
+                        dom_host_vars['ansible_password'] = 'P455w0rd'
+                        dom_host_vars['ansible_port'] = '5986'
+                        dom_host_vars['ansible_connection'] = 'winrm'
+                        dom_host_vars['ansible_winrm_server_cert_validation'] = 'ignore'
                     if group in self.inventory:
                         self.inventory[group]['hosts'].append(domain.name())
                     else:
