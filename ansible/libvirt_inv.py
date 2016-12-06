@@ -6,13 +6,13 @@ Dynamic inventory of libvirt script for Ansible, in Python.
 
 from __future__ import unicode_literals
 
+import sys
+import libvirt
+import json
+
 class LibvirtInventory(object): #pylint:disable=missing-docstring
 
     def __init__(self): #pylint:disable=missing-docstring
-        import sys
-        import libvirt
-        import json
-
         self.inventory = {'_meta': {'hostvars': {}}}
         self.mgmt_net = "192.168.124.0/24"
         self.read_cli_args()
