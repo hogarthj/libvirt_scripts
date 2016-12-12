@@ -7,8 +7,8 @@ Dynamic inventory of libvirt script for Ansible, in Python.
 from __future__ import unicode_literals
 
 import sys
-import libvirt
 import json
+import libvirt
 
 class LibvirtInventory(object): #pylint:disable=missing-docstring
 
@@ -46,8 +46,6 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
 
     @staticmethod
     def get_domain_desc(domain): #pylint:disable=missing-docstring
-        import libvirt
-        import json
         try:
             dom_inv = json.loads(domain.metadata(0, None))
         except (ValueError, libvirt.libvirtError):
@@ -65,7 +63,6 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
 
     @staticmethod
     def get_addrs(domain): #pylint: disable=missing-docstring
-        import libvirt
         try:
             return domain.interfaceAddresses(
                 libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT)
@@ -77,7 +74,6 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
                 pass
 
     def dom_info(self, domain): #pylint:disable=missing-docstring
-        import libvirt
 
         dom_inv = self.get_domain_desc(domain)
 
