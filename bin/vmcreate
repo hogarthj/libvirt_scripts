@@ -41,7 +41,10 @@ case  $vmbase in
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/24/Server/x86_64/os/"
         ;;
     f25) vmks="http://${mgmt_net}.1/ks/f25-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/25/Server/x86_64/os/"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/25/Server/x86_64/os/"
+        ;;
+    f26) vmks="http://${mgmt_net}.1/ks/f26-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/26/Server/x86_64/os/"
         ;;
     fraw)vmks="http://${mgmt_net}.1/ks/fraw-ks.cfg"
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
