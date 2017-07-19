@@ -53,12 +53,6 @@ fi
 
 vc_options=''
 
-if [[ "${vmsource}" =~ r[67]- ]]
-then
-  vc_options="${vc_options} \
-              --firstboot-command 'subscription-manager register --username=RHSMUSER --password=RHSMPASS --auto-attach'"
-fi
-
 if [[ -f ${diskimg} ]]
 then
   if [[ "${vmsource}" =~ r[67]- ]]
@@ -69,7 +63,7 @@ then
         --firstboot-command 'restorecon -Rv /root/.ssh' \
         --firstboot-command "sed -i -e 's/SELINUX=permissive/SELINUX=enforcing/' /etc/selinux/config" \
         --firstboot-command  'setenforce Enforcing' \
-        --firstboot-command 'subscription-manager register --username=jhogarth --password=K14hmand --auto-attach'
+        --firstboot-command 'subscription-manager register --username=RHSMUSER --password=RHSMPASS --auto-attach'
   else
     virt-sysprep -d "${vmsource}" \
         --edit '/etc/selinux/config:s/SELINUX=.*/SELINUX=permissive/' \
