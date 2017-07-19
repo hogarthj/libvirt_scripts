@@ -64,7 +64,8 @@ then
         --firstboot-command "sed -i -e 's/SELINUX=permissive/SELINUX=enforcing/' /etc/selinux/config" \
         --firstboot-command  'setenforce Enforcing' \
         --firstboot-command 'subscription-manager register --username=RHSMUSER --password=RHSMPASS --auto-attach'
-  else
+  elif [[ ! "${vmsource}" =~ w[0-9]+- ]]
+  then
     virt-sysprep -d "${vmsource}" \
         --edit '/etc/selinux/config:s/SELINUX=.*/SELINUX=permissive/' \
         --ssh-inject root:file:/home/${ssh_user}/.ssh/id_rsa.pub \
