@@ -14,6 +14,9 @@ then
 fi
 
 vmname=$1
+shift
+
+vmcommand="$@"
 
 if ! virsh domifaddr $vmname  &> /dev/null
 then
@@ -26,4 +29,5 @@ fi
 vmnet="$(virsh domifaddr $vmname --source agent --full | \
     awk -v mgmt=${mgmt_net} '($1 !~ /lo/ && $3 ~ /ipv4/ && $4 ~ mgmt) {print $4}')"
 
-ssh ${vmnet%%/*}
+ssh ${vmnet%%/*} $vmcommand
+
