@@ -31,25 +31,19 @@ case  $vmbase in
     c7) vmks="http://${mgmt_net}.1/ks/el7-ks.cfg"
         vmurl="http://mirror.centos.org/centos-7/7/os/x86_64/"
         ;;
-    f22) vmks="http://${mgmt_net}.1/ks/f22-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/22/Server/x86_64/os/"
-        ;;
-    f23) vmks="http://${mgmt_net}.1/ks/f23-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/23/Server/x86_64/os/"
-        ;;
-    f24) vmks="http://${mgmt_net}.1/ks/f24-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/24/Server/x86_64/os/"
-        ;;
     f25) vmks="http://${mgmt_net}.1/ks/f25-ks.cfg"
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/25/Server/x86_64/os/"
         ;;
     f26) vmks="http://${mgmt_net}.1/ks/f26-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/26/Server/x86_64/os/"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/26/Server/x86_64/os/"
+        ;;
+    f27) vmks="http://${mgmt_net}.1/ks/f27-ks.cfg"
+         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/27/Server/x86_64/os/"
         ;;
     fraw)vmks="http://${mgmt_net}.1/ks/fraw-ks.cfg"
          vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
         ;;
-    *)  echo "base not recognised, must be c6, c7, f22-24 or fraw"
+    *)  echo "base not recognised, must be c6, c7, f25-27 or fraw"
         exit 1
         ;;
 esac
