@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
-shopt -s nullglob dotglob
+shopt -s nullglob dotglob extglob
 
 if [[ "$#" -eq "0"   ]]
 then
@@ -18,6 +18,11 @@ vmbase="${vmname%%-*}"
 
 vmid="${vmname#*-}"
 
+vmuefi=""
+vmrel=""
+vmiso=""
+vmtype=""
+
 if [[ "${vmid}" == ${vmbase} ]] || [[ "${vmid}" == "" ]]
 then
     echo "Need a name after the base type"
@@ -25,30 +30,71 @@ then
 fi
 
 case  $vmbase in
-    c6) vmks="http://${mgmt_net}.1/ks/el6-ks.cfg"
-        vmurl="http://mirror.centos.org/centos-6/6/os/x86_64/"
+    c6?(u)) vmrel="rhel6.9"
+            vmtype="linux"
+            vmks="http://${mgmt_net}.1/ks/el6-ks.cfg"
+            vmurl="http://mirror.centos.org/centos-6/6/os/x86_64/"
         ;;
-    c7) vmks="http://${mgmt_net}.1/ks/el7-ks.cfg"
-        vmurl="http://mirror.centos.org/centos-7/7/os/x86_64/"
+    c7?(u)) vmrel="rhel7.4"
+            vmtype="linux"
+            vmks="http://${mgmt_net}.1/ks/el7-ks.cfg"
+            vmurl="http://mirror.centos.org/centos-7/7/os/x86_64/"
         ;;
-    f25) vmks="http://${mgmt_net}.1/ks/f25-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/25/Server/x86_64/os/"
+    f25?(u)) vmrel="fedora25"
+             vmtype="linux"
+             vmks="http://${mgmt_net}.1/ks/f25-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/25/Server/x86_64/os/"
         ;;
-    f26) vmks="http://${mgmt_net}.1/ks/f26-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/26/Server/x86_64/os/"
+    f26?(u)) vmrel="fedora26"
+             vmtype="linux"
+             vmks="http://${mgmt_net}.1/ks/f26-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/26/Server/x86_64/os/"
         ;;
-    f27) vmks="http://${mgmt_net}.1/ks/f27-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/27/Server/x86_64/os/"
+    f27?(u)) vmrel="fedora26"
+             vmtype="linux"
+             vmks="http://${mgmt_net}.1/ks/f27-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/27/Server/x86_64/os/"
         ;;
-    fraw)vmks="http://${mgmt_net}.1/ks/fraw-ks.cfg"
-         vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
+    fraw?(u)) vmrel="fedora26"
+              vmtype="linux"
+              vmks="http://${mgmt_net}.1/ks/fraw-ks.cfg"
+              vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Server/x86_64/os/"
         ;;
-    *)  echo "base not recognised, must be c6, c7, f25-27 or fraw"
+    w?(7|8|10)?(u)) ;;
+    *)  echo "base not recognised, must be c6, c7, f25-27, w7, w8, w10 or fraw or a uefi variant"
         exit 1
         ;;
 esac
 
-virt-install -n ${vmname} \
+
+if [[ "$vmbase" =~ .*u ]]
+then
+  vmuefi="--controller usb,model=nec-xhci \
+    --boot uefi --machine q35 \
+    --input tablet,bus=virtio --input keyboard,bus=virtio"
+fi
+
+if [[ "$vmbase" =~ w.* ]]
+then
+  case $vmbase in
+   w7?(u)) vmrel="win7"
+           vmtype="windows"
+           vmiso="en_windows_7_professional_with_sp1_x64_dvd_u_676939.iso"
+           ;;
+   w8?(u)) vmrel="win8.1"
+           vmtype="windows"
+           vmiso="w8-usb-install.qcow2"
+           ;;
+   w10?(u)) vmrel="win10"
+            vmtype="windows"
+            vmiso="Win10_1703_English_x64.iso"
+           ;;
+  esac
+fi
+
+if [[ "$vmtype" == "linux" ]]
+then
+  virt-install -n ${vmname} \
             --memory memory=1536,maxmemory=4096 \
             --vcpus vcpus=1,maxvcpus=3 \
             --cpu host \
@@ -56,7 +102,7 @@ virt-install -n ${vmname} \
             --features acpi=on,apic=on \
             --location "${vmurl}" \
             --extra-args "ks=${vmks}" \
-            --disk pool=default,size=20,bus=scsi,sparse=yes,format=raw \
+            --disk pool=default,size=20,bus=scsi,sparse=yes,format=raw,cache=unsafe \
             --network network=default,model=virtio \
             --graphics spice \
             --sound none \
@@ -65,8 +111,9 @@ virt-install -n ${vmname} \
             --channel unix,target_type=virtio,name=org.qemu.guest_agent.0 \
             --video qxl \
             --memballoon virtio \
-            --rng /dev/random \
-            --noautoconsole 
+            --rng /dev/urandom \
+            --noautoconsole ${vmuefi}
+fi
 
 nohup virt-viewer -r -w ${vmname} &> /dev/null &
 
