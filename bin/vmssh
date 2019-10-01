@@ -18,6 +18,8 @@ shift
 
 vmcommand="$@"
 
+vmnet=""
+
 if ! virsh domifaddr $vmname  &> /dev/null
 then
     echo "VM ${vmname} not found"
@@ -26,8 +28,18 @@ then
     exit 1
 fi
 
-vmnet="$(virsh domifaddr $vmname --source agent --full | \
-    awk -v mgmt=${mgmt_net} '($1 !~ /lo/ && $3 ~ /ipv4/ && $4 ~ mgmt) {print $4}')"
+while [[ -z $vmnet ]]
+do
+  vmnet="$(virsh domifaddr $vmname --source agent --full 2> /dev/null | \
+      awk -v mgmt=${mgmt_net} '($1 !~ /lo/ && $3 ~ /ipv4/ && $4 ~ mgmt) {print $4}'i || /bin/true)"
+
+  if ! ssh -q ${vmnet%%/*} /bin/true
+  then
+    echo "${vmname} not yet ready ..." >&2
+    vmnet=""
+    sleep 1
+  fi
+done
 
 ssh ${vmnet%%/*} $vmcommand
 
