@@ -35,25 +35,30 @@ case  $vmbase in
             vmks="http://${mgmt_net}.1/ks/el6-ks.cfg"
             vmurl="http://mirror.centos.org/centos-6/6/os/x86_64/"
         ;;
-    c7?(u)) vmrel="rhel7.4"
+    c7?(u)) vmrel="rhel7.7"
             vmtype="linux"
             vmks="http://${mgmt_net}.1/ks/el7-ks.cfg"
             vmurl="http://mirror.centos.org/centos-7/7/os/x86_64/"
         ;;
-    f25?(u)) vmrel="fedora25"
-             vmtype="linux"
-             vmks="http://${mgmt_net}.1/ks/f25-ks.cfg"
-             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/25/Server/x86_64/os/"
+    c8?(u)) vmrel="rhel8.0"
+            vmtype="linux"
+            vmks="http://${mgmt_net}.1/ks/el8-ks.cfg"
+            vmurl="http://mirror.centos.org/centos-8/8/BaseOS/x86_64/kickstart/"
         ;;
-    f26?(u)) vmrel="fedora26"
+    f29?(u)) vmrel="fedora29"
              vmtype="linux"
-             vmks="http://${mgmt_net}.1/ks/f26-ks.cfg"
-             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/26/Server/x86_64/os/"
+             vmks="http://${mgmt_net}.1/ks/f29-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/29/Server/x86_64/os/"
         ;;
-    f27?(u)) vmrel="fedora26"
+    f30?(u)) vmrel="fedora30"
              vmtype="linux"
-             vmks="http://${mgmt_net}.1/ks/f27-ks.cfg"
-             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/27/Server/x86_64/os/"
+             vmks="http://${mgmt_net}.1/ks/f30-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/releases/30/Server/x86_64/os/"
+        ;;
+    f31?(u)) vmrel="fedora31"
+             vmtype="linux"
+             vmks="http://${mgmt_net}.1/ks/f31-ks.cfg"
+             vmurl="http://dl.fedoraproject.org/pub/fedora/linux/development/31/Server/x86_64/os/"
         ;;
     fraw?(u)) vmrel="fedora26"
               vmtype="linux"
@@ -100,6 +105,7 @@ then
             --cpu host \
             --clock offset=utc,kvmclock_present=yes \
             --features acpi=on,apic=on \
+            --os-variant="${vmrel}" \
             --location "${vmurl}" \
             --extra-args "ks=${vmks}" \
             --disk pool=default,size=20,bus=scsi,sparse=yes,format=raw,cache=unsafe \
