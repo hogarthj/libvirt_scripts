@@ -36,7 +36,16 @@ then
     exit 1
 fi
 
+pushd /var/lib/libvirt/images
+fstype="$(df --output="fstype" . | grep -v 'Type')"
+popd
+
 echo "Creating VM ${vmname} from base ${vmsource}"
 
-virt-clone -o ${vmsource} --auto-clone --reflink -n ${vmname}
+if [[ "${fsfype}" == "btrfs" ]]
+then
+  virt-clone -o ${vmsource} --auto-clone --reflink -n ${vmname}
+else
+  virt-clone -o ${vmsource} --auto-clone -n ${vmname}
+fi
 

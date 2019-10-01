@@ -41,6 +41,8 @@ fi
 
 pushd /var/lib/libvirt/images
 
+fstype="$(df --output="fstype" . | grep -v 'Type')"
+
 if [[ -f ${vmsource}.raw ]]
 then
   diskimg="${vmsource}.raw"
@@ -75,7 +77,10 @@ then
   fi
     virt-sparsify  --tmp ./overlays/ ${diskimg}{,.sparse}
     mv -f ${diskimg}{.sparse,}
-    btrfs fi def -v -f ${diskimg}
+    if [[ "${fstype}" == "btrfs" ]]
+    then
+      btrfs fi def -v -f ${diskimg}
+    fi
 fi
 
 popd
