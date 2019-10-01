@@ -1,24 +1,22 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Dynamic inventory of libvirt script for Ansible, in Python.
 '''
 
-from __future__ import unicode_literals
-
 import sys
 import json
 import libvirt
 
-class LibvirtInventory(object): #pylint:disable=missing-docstring
+class LibvirtInventory(): #pylint:disable=missing-docstring
 
     def __init__(self): #pylint:disable=missing-docstring
         self.inventory = {'_meta': {'hostvars': {}}}
-        self.mgmt_net = "192.168.124.0/24"
+        self.mgmt_net = "192.168.122.0/24"
         self.read_cli_args()
         self.conn = libvirt.open()
         if self.conn is None:
-            print 'Failed to connect to hypervisor'
+            print('Failed to connect to hypervisor')
             sys.exit(1)
 
         if self.args.list:
@@ -27,13 +25,11 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
             #self.dom_info(self.args.host)
             pass
 
-        print json.dumps(self.inventory)
+        print(json.dumps(self.inventory))
 
     def get_inv(self): #pylint:disable=missing-docstring
         domains = self.conn.listDomainsID()
-        if len(domains) == 0:
-            return
-        else:
+        if domains:
             for domain in domains:
                 self.dom_info(self.get_domain(domain))
 
@@ -58,8 +54,7 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
         import ipaddress
 
         return bool(addr['type'] == 0 and \
-          ipaddress.ip_address(unicode(addr['addr'])) in ipaddress.ip_network(mgmt_net)
-                   )
+          ipaddress.ip_address(addr['addr']) in ipaddress.ip_network(mgmt_net))
 
     @staticmethod
     def get_addrs(domain): #pylint: disable=missing-docstring
@@ -80,7 +75,7 @@ class LibvirtInventory(object): #pylint:disable=missing-docstring
         try:
             dom_host_vars = {}
             dom_ifaces = self.get_addrs(domain)
-            if dom_ifaces != None:
+            if dom_ifaces is not None:
                 for iface in dom_ifaces:
                     for addr in dom_ifaces[iface]['addrs']:
                         if self.is_mgmt_net(addr, self.mgmt_net):
