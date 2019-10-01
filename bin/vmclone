@@ -42,7 +42,7 @@ popd
 
 echo "Creating VM ${vmname} from base ${vmsource}"
 
-if [[ "${fsfype}" == "btrfs" ]]
+if [[ "${fstype}" == "btrfs" ]]
 then
   virt-clone -o ${vmsource} --auto-clone --reflink -n ${vmname}
 else
